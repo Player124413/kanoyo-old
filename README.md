@@ -1,2 +1,1 @@
-# kanoyo
-da
+# Thanks 🍏 Applio-RVC-Fork for a good fork.
