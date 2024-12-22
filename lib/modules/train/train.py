@@ -312,30 +312,30 @@ def run(rank, n_gpus, hps):
         global_step = 0
         if hps.pretrainG != "":
             if rank == 0:
-                logger.info("Загружен pretrained %s" % (hps.pretrainG))
+                print("Загружен pretrained %s" % (hps.pretrainG))
             if hasattr(net_g, "module"):
-                logger.info(
+                print(
                     net_g.module.load_state_dict(
                         torch.load(hps.pretrainG, map_location="cpu")["model"]
                     )
                 )  ##测试不加载优化器
             else:
-                logger.info(
+                print(
                     net_g.load_state_dict(
                         torch.load(hps.pretrainG, map_location="cpu")["model"]
                     )
                 )  ##测试不加载优化器
         if hps.pretrainD != "":
             if rank == 0:
-                logger.info("Загружен %s" % (hps.pretrainD))
+                print("Загружен %s" % (hps.pretrainD))
             if hasattr(net_d, "module"):
-                logger.info(
+                print(
                     net_d.module.load_state_dict(
                         torch.load(hps.pretrainD, map_location="cpu")["model"]
                     )
                 )
             else:
-                logger.info(
+                print(
                     net_d.load_state_dict(
                         torch.load(hps.pretrainD, map_location="cpu")["model"]
                     )
@@ -593,7 +593,7 @@ def train_and_evaluate(
         if rank == 0 and not hps.if_stop_on_fit:
             if global_step % hps.train.log_interval == 0:
                 lr = optim_g.param_groups[0]["lr"]
-                logger.info(
+                print(
                     "Тренируемая эпоха: {} [{:.0f}%]".format(
                         epoch, 100.0 * batch_idx / len(train_loader)
                     )
@@ -672,7 +672,7 @@ def train_and_evaluate(
                 ckpt = net_g.module.state_dict()
             else:
                 ckpt = net_g.state_dict()
-            logger.info(
+            print(
                 "сохранение ckpt %s_e%s:%s"
                 % (
                     hps.name,
@@ -703,7 +703,7 @@ def train_and_evaluate(
             os.remove(f"{hps.model_dir}/col")
         logger.info("Была нажата кнопка Стоп. Программа закрыта.")
         ckpt = net_g.module.state_dict() if hasattr(net_g, "module") else net_g.state_dict()
-        logger.info(
+        print(
             "сохранение финального ckpt:%s"
             % (
                 savee(
@@ -721,7 +721,7 @@ def train_and_evaluate(
         logger.warning("Mode collapse detected, model quality may be hindered. More information here: https://rentry.org/RVC_making-models#mode-collapse")
         logger.warning(f'loss_gen_all={loss_gen_all.item()}, последнее значение={lastValue}, падение % {loss_gen_all.item() / lastValue * 100}')
         if hps.if_retrain_collapse:
-            logger.info("Перезапуск обучения с последней эпохи...")
+            print("Перезапуск обучения с последней эпохи...")
             with open(f"{hps.model_dir}/col", 'w') as f:
                 f.write(f'{bestEpochStep},{epoch}')
             os._exit(15)
@@ -729,10 +729,10 @@ def train_and_evaluate(
         lastValue = loss_gen_all.item()
     
     if rank == 0 and not hps.if_stop_on_fit:
-        logger.info("Epoch: {} {}".format(epoch, epoch_recorder.record()))
+        print("Epoch: {} {}".format(epoch, epoch_recorder.record()))
     if rank == 0 and hps.if_stop_on_fit:
         lr = optim_g.param_groups[0]["lr"]
-        logger.info(
+        print(
             f"====> Эпоха: {epoch} Шаг: {global_step} Темп обучения: {lr:.5} {epoch_recorder.record()}"
         )
         # Amor For Tensorboard display
@@ -741,7 +741,7 @@ def train_and_evaluate(
         if loss_kl > 9:
             loss_kl = 9
         # update tensorboard every epoch
-        logger.info(
+        print(
             f"loss_gen_all={loss_gen_all:.3f}, loss_disc={loss_disc:.3f}, loss_gen={loss_gen:.3f}, loss_fm={loss_fm:.3f}, loss_mel={loss_mel:.3f}, loss_kl={loss_kl:.3f}"
         )
         scalar_dict = {
@@ -832,7 +832,7 @@ def train_and_evaluate(
                     ckpt = net_g.module.state_dict()
                 else:
                     ckpt = net_g.state_dict()
-                logger.info(
+                print(
                     f'Сохранение лучшего на данный момент ckpt: {hps.name}_fittest:{savee(ckpt, hps.sample_rate, hps.if_f0, f"{hps.name}_fittest", epoch, hps.version, hps)}'
                 )
         if epoch < 10:
@@ -843,23 +843,23 @@ def train_and_evaluate(
             message = f"Новая лучшая эпоха! [e{epoch}]\n"
         else:
             message = f'Последняя лучшая эпоха была [e{best["epoch"]}] seen {epoch - best["epoch"]} эпох(и) назад\n'
-        logger.info(message)
+        print(message)
         # if overtraining is detected, exit (idk what the 2333333 stands for but it seems like success ¯\_(ツ)_/¯)
         if epoch - best["epoch"] >= 100:
             shutil.copy2(f"logs/weights/{hps.name}_fittest.pth", os.path.join(hps.model_dir,f"{hps.name}_{epoch}.pth"))
-            logger.info(
+            print(
                 f'После этой эпохи улучшений не обнаружено: [e{best["epoch"]}]. Программа закрыта.'
             )
             os._exit(2333333)
 
     if epoch >= hps.total_epoch and rank == 0:
-        logger.info("Обучение успешно завершено, закрытие программы...")
+        print("Обучение успешно завершено, закрытие программы...")
 
         if hasattr(net_g, "module"):
             ckpt = net_g.module.state_dict()
         else:
             ckpt = net_g.state_dict()
-        logger.info(
+        print(
             "Сохранение финального ckpt... %s"
             % (
                 savee(
