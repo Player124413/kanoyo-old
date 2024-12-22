@@ -1,9 +1,9 @@
 import json
 import sys
-sys.path.append('..')
 import logging
 
 logger = logging.getLogger(__name__)
+
 def load_language_list(language):
     try:
         with open(f"./assets/i18n/langs/{language}.json", "r", encoding="utf-8") as f:
@@ -26,21 +26,22 @@ class I18nAuto:
     """
     def __init__(self, language=None):
         from locale import getdefaultlocale
-        language = language or getdefaultlocale()[0]
+        default_language = getdefaultlocale()[0]
+        language = language or default_language
 
-        # Check if a specific language variant exists, e.g., 'es_ES'
+        if default_language is None:
+            logger.warning("Failed to detect default language. Falling back to 'en_US'.")
+            language = 'en_US'
+
         if self._language_exists(language):
             self.language = 'ru_RU'
         else:
-            # If not, check if there is a language with the first two characters
-            # matching, e.g., 'es_' for 'es_ES'.
             lang_prefix = language[:2]
             for available_language in self._get_available_languages():
                 if available_language.startswith(lang_prefix):
                     self.language = available_language
                     break
             else:
-                # If no match found, default to 'en_US'.
                 self.language = 'en_US'
 
         self.language_map = load_language_list(self.language)
