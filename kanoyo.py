@@ -1905,7 +1905,6 @@ def GradioSetup():
                         with gr.Column():  # First column for audio-related inputs
                             dropbox = gr.File(label=i18n("Drag your audio here:"))
                             record_button = gr.Audio(
-                                source="microphone",
                                 label=i18n("Or record an audio:"),
                                 type="filepath",
                             )
@@ -3053,11 +3052,10 @@ def GradioSetup():
 
 def GradioRun(app):
     share_gradio_link = config.iscolab or config.paperspace
-    concurrency_count = 511
-    max_size = 1022
+
 
     if config.iscolab or config.paperspace:
-        app.queue(concurrency_count=concurrency_count, max_size=max_size).launch(
+        app.queue().launch(
             server_name="0.0.0.0",
             inbrowser=not config.noautoopen,
             server_port=config.listen_port,
@@ -3065,7 +3063,7 @@ def GradioRun(app):
             favicon_path="./assets/icon.png",
         )
     else:
-        app.queue(concurrency_count=concurrency_count, max_size=max_size).launch(
+        app.queue().launch(
             server_name="0.0.0.0",
             inbrowser=not config.noautoopen,
             server_port=config.listen_port,
