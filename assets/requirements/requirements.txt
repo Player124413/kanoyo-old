@@ -13,6 +13,7 @@ mega.py==1.0.8
 git+https://github.com/wkentaro/gdown.git
 edge-tts
 nltk
+ffmpeg
 numba; sys_platform == 'linux'
 numba==0.56.4; sys_platform == 'win32'
 numpy==1.23.5
